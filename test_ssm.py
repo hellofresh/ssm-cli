@@ -14,8 +14,7 @@ def test_list_no_arg():
 
     # Call list without any parameters
     out = ssm.list_param(conn)
-    print "================================================"
-    print out
+
     assert len(out) == 2
     assert 'test1' in out
     assert 'test' in out
@@ -29,8 +28,7 @@ def test_list_starts_with():
     conn.put_parameter(Name='anotherValue', Value='testing123', Type='SecureString')
 
     out = ssm.list_param(conn, ["test"])
-    print "================================================"
-    print out
+
     assert len(out) == 1
     assert 'test1' in out
     assert 'anotherValue' not in out
@@ -51,8 +49,7 @@ test''')
     test_file.close()
 
     result = ssm.process_file(conn, test_file.name)
-    print "================================================"
-    print result
+
     assert 'list' in result.keys()
     assert 'test1' in result['list']
     assert 'test2' in result['list']
