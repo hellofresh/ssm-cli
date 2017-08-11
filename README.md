@@ -25,13 +25,24 @@ Filter parameters by name:
 ```
 Will list parameters starting with `hello` and `world`
 
+### Delete Parameters
+```
+./ssm.py delete "myparam" "invalid"
+```
+Output:
+```
+DeletedParameters:
+myparam
+InvalidParameters:
+invalid
+```
+Will delete the parameter `myparam`, invalid parameters are ignored and printed on stdout.
 
 ### File
 
 The file options takes a python config file as an input and performs actions based on the sections in the file.
 
-For example a file containing:
-
+#### List
 ```
 [list]
 hello
@@ -46,3 +57,17 @@ hello1
 world
 world2
 ```
+#### Delete
+```
+[delete]
+hello1
+Invalid
+```
+Will try to delete the listed parameters as follows:
+```
+[delete.DeletedParameters]
+hello1
+[delete.InvalidParameters]
+Invalid
+```
+Deleted parameters are listed in the `delete.DeletedParameters` section while invalid parameters are listed in the `delete.InvalidParameters`.

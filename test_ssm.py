@@ -35,6 +35,35 @@ def test_list_starts_with():
 
 
 @mock_ssm
+def test_delete_correct():
+    conn = boto3.client('ssm')
+    # Create a parameter and check if it is deleted.
+    conn.put_parameter(Name='test1', Value='testing123', Type='SecureString')
+
+    out, err = ssm.delete_param(conn, ['test1'])
+    assert len(err) == 0
+    assert len(out) == 1
+    assert 'test1' in out
+    # Check if parameter is actually deleted
+    out = ssm.list_param(conn, ['test1'])
+    assert len(out) == 0
+
+
+@mock_ssm
+def test_delete_invalid():
+    conn = boto3.client('ssm')
+
+    # Delete an invalid parameter
+    out, err = ssm.delete_param(conn, ['InvalidParam'])
+
+    print out
+    print err
+    assert len(out) == 0
+    assert len(err) == 1
+    assert 'InvalidParam' in err
+
+
+@mock_ssm
 def test_file_list():
     # Create a temp file
     test_file = tempfile.NamedTemporaryFile(delete=False)
