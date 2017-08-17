@@ -1,6 +1,6 @@
 import boto3
 import ssm
-import tempfile
+from click.testing import CliRunner
 
 from moto import mock_ssm
 
@@ -9,15 +9,16 @@ from moto import mock_ssm
 def test_list_no_arg():
     conn = boto3.client('ssm')
     # Create two parameters and check both are returned
-    conn.put_parameter(Name='test', Value='testing123', Type='SecureString')
-    conn.put_parameter(Name='test1', Value='testing123', Type='SecureString')
+    conn.put_parameter(Name='test1', Value='testing1', Type='SecureString')
+    conn.put_parameter(Name='test2', Value='testing2', Type='SecureString')
 
     # Call list without any parameters
-    out = ssm.list_param(conn)
+    runner = CliRunner()
+    result = runner.invoke(ssm.list)
 
-    assert len(out) == 2
-    assert 'test1' in out
-    assert 'test' in out
+    assert "No parameters found" not in result.output
+    assert 'test1' in result.output
+    assert 'test2' in result.output
 
 
 @mock_ssm
@@ -27,11 +28,30 @@ def test_list_starts_with():
     conn.put_parameter(Name='test1', Value='testing123', Type='SecureString')
     conn.put_parameter(Name='anotherValue', Value='testing123', Type='SecureString')
 
-    out = ssm.list_param(conn, ["test"])
+    runner = CliRunner()
+    result = runner.invoke(ssm.list, ['--name', 'test'])
 
-    assert len(out) == 1
-    assert 'test1' in out
-    assert 'anotherValue' not in out
+    assert 'test1' in result.output
+    assert 'anotherValue' not in result.output
+
+
+@mock_ssm
+def test_get_param():
+    conn = boto3.client('ssm')
+
+    # Create two parameters and check both are returned
+    conn.put_parameter(Name='test1', Value='value1', Type='SecureString')
+    conn.put_parameter(Name='test2', Value='value2', Type='SecureString')
+
+    runner = CliRunner()
+    result = runner.invoke(ssm.get, ['--name', 'test1'])
+
+    assert 'Invalid Parameters' not in result.output
+    assert 'value1' in result.output
+    assert 'test1' in result.output
+
+    assert 'test2' not in result.output
+    assert 'value2' not in result.output
 
 
 @mock_ssm
@@ -40,13 +60,14 @@ def test_delete_correct():
     # Create a parameter and check if it is deleted.
     conn.put_parameter(Name='test1', Value='testing123', Type='SecureString')
 
-    out, err = ssm.delete_param(conn, ['test1'])
-    assert len(err) == 0
-    assert len(out) == 1
-    assert 'test1' in out
+    runner = CliRunner()
+    result = runner.invoke(ssm.delete, ['--name', 'test1'])
+    assert 'Deleted Parameters' in result.output
+    assert 'test1' in result.output
     # Check if parameter is actually deleted
-    out = ssm.list_param(conn, ['test1'])
-    assert len(out) == 0
+    runner = CliRunner()
+    result = runner.invoke(ssm.list, ['--name', 'test1'])
+    assert 'No parameters found' in result.output
 
 
 @mock_ssm
@@ -54,32 +75,9 @@ def test_delete_invalid():
     conn = boto3.client('ssm')
 
     # Delete an invalid parameter
-    out, err = ssm.delete_param(conn, ['InvalidParam'])
+    runner = CliRunner()
+    result = runner.invoke(ssm.delete, ['--name', 'invalid_param'])
 
-    print out
-    print err
-    assert len(out) == 0
-    assert len(err) == 1
-    assert 'InvalidParam' in err
-
-
-@mock_ssm
-def test_file_list():
-    # Create a temp file
-    test_file = tempfile.NamedTemporaryFile(delete=False)
-
-    conn = boto3.client('ssm')
-    conn.put_parameter(Name='test1', Value='ali', Type='SecureString')
-    conn.put_parameter(Name='test2', Value='ali', Type='SecureString')
-    conn.put_parameter(Name='anotherValue', Value='ali', Type='SecureString')
-
-    test_file.write('''[list]
-test''')
-    test_file.close()
-
-    result = ssm.process_file(conn, test_file.name)
-
-    assert 'list' in result.keys()
-    assert 'test1' in result['list']
-    assert 'test2' in result['list']
-    assert 'anotherValue' not in result['list']
+    assert 'Invalid Parameters' in result.output
+    assert 'invalid_param' in result.output
+    assert 'Deleted Parameters' not in result.output

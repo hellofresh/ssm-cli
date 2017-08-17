@@ -3,71 +3,79 @@ CLI for setting and retrieving parameters and secrets from AWS SSM.
 
 
 ## Installation
-
-TODO
+From the root project directory:
+```
+pip install .
+```
 
 ## Usage
 Running:
 ```
-./ssm.py
+ssm --help
 ```
 
 ### List parameters
 
 List all parameters:
 ```
-./ssm.py list
-```
-
-Filter parameters by name:
-```
-./ssm.py list hello world
-```
-Will list parameters starting with `hello` and `world`
-
-### Delete Parameters
-```
-./ssm.py delete "myparam" "invalid"
+ssm list
 ```
 Output:
 ```
-DeletedParameters:
-myparam
-InvalidParameters:
-invalid
++------------------------------------+---------------+
+| Name                               | Description   |
++====================================+===============+
+| /platform/infra/testing            | Test param    |
++------------------------------------+---------------+
+| MY_KEY                             | MY TEST KEY   |
++------------------------------------+---------------+
+```
+Filter parameters by name:
+```
+ssm list --name hello
+```
+Will list parameters starting with `hello`
+```
++--------+---------------+
+| Name   | Description   |
++========+===============+
+| hello1 | world1        |
++--------+---------------+
+```
+
+### Delete Parameters
+```
+ssm delete --name myparam --delete invalid
 ```
 Will delete the parameter `myparam`, invalid parameters are ignored and printed on stdout.
+Output:
+```
++----------------------+
+| Deleted Parameters   |
++======================+
+| myparm               |
++----------------------+
++----------------------+
+| Invalid Parameters   |
++======================+
+| invalid              |
++----------------------+
+```
+### Get parameters
+```
+ssm get --name MY_KEY
+```
+Will retrieve and decrypt the param MY_KEY
+Output:
+```
++--------+---------+
+| Name   | Value   |
++========+=========+
+| MY_KEY | MY_VAL  |
++--------+---------+
+```
 
-### File
-
-The file options takes a python config file as an input and performs actions based on the sections in the file.
-
-#### List
+### Put parameters
 ```
-[list]
-hello
-world
+ssm put --name <name> --value <value> --description <optional description> --encrypt
 ```
-
-Will list parameters starting with `hello` and `world` as follows:
-```
-[list]
-hello
-hello1
-world
-world2
-```
-#### Delete
-```
-[delete]
-hello1
-Invalid
-```
-Will try to delete the listed parameters as follows:
-```
-[delete.DeletedParameters]
-hello1
-[delete.InvalidParameters]
-Invalid
-```
-Deleted parameters are listed in the `delete.DeletedParameters` section while invalid parameters are listed in the `delete.InvalidParameters`.
