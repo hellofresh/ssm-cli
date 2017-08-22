@@ -79,3 +79,84 @@ Output:
 ```
 ssm put --name <name> --value <value> --description <optional description> --encrypt
 ```
+
+
+### From file
+Multiple operation can be done using the `from-file` option.
+#### Usage
+Specify the path to a yaml file using the `--path <path>` option:
+```
+ssm from-file --path <path to yaml file>
+```
+#### Format
+The file should be a valid yaml file with the keys equal to the operations namely:
+
+* list
+* get
+* delete
+* put
+
+Multiple operation can be specified in one file.
+
+
+#### Examples
+
+##### put
+```
+put:
+    - name: test
+      value: val
+      encrypt: True
+```
+Output:
+```
+put:
+  CreatedParameters:
+  - test
+```
+
+##### list
+```
+list:
+    - someparam
+    - anotherparam
+```
+Output:
+```
+list:
+- Description: Some Parameter
+  Name: someparam
+- Description: Another Parameter
+  Name: anotherparam
+
+```
+#### delete
+```
+delete:
+  - validparam
+  - invalidparam
+```
+Output:
+```
+delete:
+  DeletedParameters:
+  - x14
+  InvalidParameters:
+  - invalidparam
+````
+#### get
+```
+get:
+  - test
+  - invalid
+```
+Output:
+```
+get:
+  GetParameters:
+  - Name: test
+    Type: SecureString
+    Value: val
+  InvalidParameters:
+  - invalid
+```

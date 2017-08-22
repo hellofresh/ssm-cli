@@ -8,7 +8,8 @@ setup(
     install_requires=[
         'click',
         'boto3',
-        'tabulate'
+        'tabulate',
+        'pyyaml'
     ],
     entry_points='''
         [console_scripts]
