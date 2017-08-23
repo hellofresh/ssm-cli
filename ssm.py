@@ -142,7 +142,7 @@ def from_file(path):
     if not set(data.keys()).issubset(set(['list', 'get', 'delete', 'put'])):
         click.echo("Invalid keys in file, supported keys are: list, get, delete and put.")
         exit(1)
-    for key, value in data.iteritems():
+    for key, value in data.items():
         if key == 'list':
             output['list'] = list_params(value)
         elif key == 'get':

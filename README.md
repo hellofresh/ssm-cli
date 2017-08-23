@@ -4,6 +4,8 @@
   </a>
 </p>
 
+[![Build Status](https://travis-ci.org/hellofresh/ssm-cli.svg?branch=master)](https://travis-ci.org/hellofresh/ssm-cli)
+
 # ssm-cli
 CLI for setting and retrieving parameters and secrets from AWS SSM.
 

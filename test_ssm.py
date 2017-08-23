@@ -206,7 +206,7 @@ def test_cli_put_param():
 @mock_ssm
 def test_cli_file_list():
     # Create a temp file
-    test_file = tempfile.NamedTemporaryFile(delete=False)
+    test_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
 
     conn = boto3.client('ssm')
     conn.put_parameter(Name='test1', Value='val', Type='SecureString')
@@ -219,19 +219,18 @@ list:
 
     runner = CliRunner()
     result = runner.invoke(ssm.from_file, ['--path', test_file.name])
-
     output_yaml = yaml.load(result.output)
 
     assert 'list' in output_yaml.keys()
     assert len(output_yaml['list']) == 2
-    assert output_yaml['list'][0]['Name'] == 'test1'
-    assert output_yaml['list'][1]['Name'] == 'test2'
+    assert 'test1' in [param['Name'] for param in output_yaml['list']]
+    assert 'test2' in [param['Name'] for param in output_yaml['list']]
 
 
 @mock_ssm
 def test_file_delete():
     # Create a temp file
-    test_file = tempfile.NamedTemporaryFile(delete=False)
+    test_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
 
     conn = boto3.client('ssm')
     conn.put_parameter(Name='test1', Value='val', Type='SecureString')
@@ -259,7 +258,7 @@ delete:
 @mock_ssm
 def test_file_get():
     # Create a temp file
-    test_file = tempfile.NamedTemporaryFile(delete=False)
+    test_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
 
     conn = boto3.client('ssm')
     conn.put_parameter(Name='test1', Value='val', Type='SecureString')
@@ -287,7 +286,7 @@ get:
 @mock_ssm
 def test_file_put():
     # Create a temp file
-    test_file = tempfile.NamedTemporaryFile(delete=False)
+    test_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
     test_file.write('''
 put:
     - name: test
@@ -299,7 +298,7 @@ put:
     result = runner.invoke(ssm.from_file, ['--path', test_file.name])
 
     output_yaml = yaml.load(result.output)
-    print output_yaml
+
     assert 'put' in output_yaml.keys()
 
     assert len(output_yaml['put']['CreatedParameters']) == 1
