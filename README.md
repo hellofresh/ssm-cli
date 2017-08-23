@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://hellofresh.com">
+    <img width="120" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
+  </a>
+</p>
+
 # ssm-cli
 CLI for setting and retrieving parameters and secrets from AWS SSM.
 
@@ -13,6 +19,13 @@ Running:
 ```
 ssm --help
 ```
+## Configuring Credentials
+The Following authentication methods are supported:
+* Environment variables
+* Shared credential file (~/.aws/credentials)
+* AWS config file (~/.aws/config)
+
+For more details please see [here](http://boto3.readthedocs.io/en/latest/guide/configuration.html).
 
 ### List parameters
 
